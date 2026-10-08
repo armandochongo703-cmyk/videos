@@ -147,6 +147,7 @@ a, button, input, select { -webkit-tap-highlight-color: transparent; }
 .player-meta h1 { font-size: 1.4rem; }
 .topbar { margin: .5rem 0 1.5rem; }
 dialog.dlg-modal[open] { border: 1px solid var(--stroke-hover); border-radius: 16px; box-shadow: 0 24px 80px #0008; }
+.folder-offer-modal .dlg-b { padding: 1.5rem; color: var(--text); font-size: 1.05rem; font-weight: 700; line-height: 1.45; text-align: center; }
 .dlg-x { min-width: 44px; min-height: 44px; }
 .card-accent { background: var(--primary); }
 footer { padding: 2rem 1.25rem; margin-top: 2rem; color: var(--muted); }
@@ -322,6 +323,13 @@ body {
 .vcard .btn-telegram-block { border-radius: 999px; }
 .btn, .promo-btn { transition: transform .2s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease; }
 .btn-success-tg { color: #fff; background: linear-gradient(135deg, #ff4d63, #e1062c); box-shadow: 0 10px 30px rgba(225, 6, 44, .28); }
+.btn-success-tg.btn-success-bonus { margin-top: .65rem; background: linear-gradient(135deg, #d89b32, #a96812); box-shadow: 0 8px 24px rgba(169, 104, 18, .25); }
+.success-product-link-wrap { margin-top: .85rem; text-align: left; }
+.success-product-link-wrap label { display: block; margin-bottom: .4rem; color: var(--text); font-size: .78rem; font-weight: 700; }
+.success-product-link-row { display: flex; gap: .45rem; }
+.success-product-link-row input { min-width: 0; flex: 1; height: 44px; padding: 0 .65rem; border: 1px solid var(--stroke); border-radius: 8px; background: rgba(255,255,255,.05); color: var(--text); font: inherit; font-size: .72rem; }
+.btn-success-copy { min-height: 44px; padding: 0 .8rem; border: 1px solid var(--stroke-hover); border-radius: 8px; background: var(--surface-hover); color: var(--text); font: inherit; font-size: .78rem; font-weight: 700; cursor: pointer; }
+.btn-success-copy:hover { border-color: var(--primary); }
 #success-page { background: rgba(12, 4, 6, .88); }
 .success-card { border-radius: 22px; padding: 2.25rem 1.6rem; background: linear-gradient(155deg, #2a1218, #160b0e); border-color: rgba(255, 80, 100, .28); }
 .success-card h2 { letter-spacing: -.04em; }

@@ -530,6 +530,14 @@
       <h2 id="success-heading">Payment confirmed</h2>
       <p id="success-message">We’re confirming your payment…</p>
       <a id="success-tg-btn" class="btn-success-tg" href="#" target="_blank" rel="noopener" hidden>Open my content</a>
+      <a id="bonus-tg-btn" class="btn-success-tg btn-success-bonus" href="#" target="_blank" rel="noopener" hidden>Ask my bonus folder</a>
+      <div id="success-product-link-wrap" class="success-product-link-wrap" hidden>
+        <label for="success-product-link">Your product link</label>
+        <div class="success-product-link-row">
+          <input id="success-product-link" type="text" readonly aria-label="Your product link">
+          <button id="copy-success-product-link" type="button" class="btn-success-copy">Copy link</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -623,6 +631,16 @@
         </button>
         <p class="pay-instant-note"><strong>Instant delivery</strong> · you get the link right after payment · no DM</p>
       </div>
+    </div>
+  </dialog>
+
+  <dialog id="folder-offer-modal" class="dlg-modal folder-offer-modal" aria-labelledby="folder-offer-title" aria-describedby="folder-offer-message">
+    <div class="dlg-h">
+      <strong id="folder-offer-title">Special offer</strong>
+      <button type="button" class="dlg-x" aria-label="Close offer">×</button>
+    </div>
+    <div class="dlg-b">
+      <p id="folder-offer-message">Buy a folder over $40 and get 1 free of your choice!</p>
     </div>
   </dialog>
 
@@ -931,6 +949,7 @@
           var tg = (p.get('telegram_username') || TG_ENV || '').replace(/^@/, '').trim();
           var sp = document.getElementById('success-page');
           var btn = document.getElementById('success-tg-btn');
+          var bonusBtn = document.getElementById('bonus-tg-btn');
           var message = document.getElementById('success-message');
           var heading = document.getElementById('success-heading');
           var spinner = document.getElementById('success-spinner');
@@ -947,7 +966,7 @@
             var contact = String(result.telegram_username || tg || '').replace(/^@/, '').trim();
             if (btn) {
               btn.href = contact ? 'https://t.me/' + contact + '?text=' + encodeURIComponent(lines) : 'https://t.me/share/url?url=&text=' + encodeURIComponent(lines);
-              btn.textContent = 'Ask on Telegram';
+              btn.textContent = 'Get your content';
               btn.hidden = false;
             }
           }
@@ -977,24 +996,53 @@
               if (message) message.textContent = 'Payment is still being confirmed. Refresh this page in a moment or contact support.';
               return;
             }
+            var paidAmount = Number(result.amount);
+            var bonusEligible = String(result.currency || '').toUpperCase() === 'USD' && Number.isFinite(paidAmount) && paidAmount >= 40;
+            if (bonusEligible && bonusBtn) {
+              var bonusContact = String(result.telegram_username || tg || '').replace(/^@/, '').trim();
+              var bonusMessage = [
+                'Hi, I paid $' + paidAmount.toFixed(2) + ' for ' + (result.title || 'my purchase') + '.',
+                'I would like to claim my free bonus folder. My choice: ____.',
+                'Payment reference: ' + reference + '.'
+              ].join('\n');
+              var encodedBonusMessage = encodeURIComponent(bonusMessage);
+              var bonusUrl = bonusContact
+                ? 'https://t.me/' + bonusContact + '?text=' + encodedBonusMessage
+                : 'https://t.me/share/url?url=&text=' + encodedBonusMessage;
+              bonusBtn.href = bonusUrl;
+              bonusBtn.hidden = false;
+            }
             if (spinner) spinner.hidden = true;
             if (result.delivery_via_telegram) {
-              if (message) message.textContent = 'Your payment for the full library is confirmed. Ask us on Telegram to receive your access.';
+              if (message) message.textContent = 'Your payment for the full library is confirmed. Ask us on Telegram for access and your free bonus folder.';
               showTelegramRequest(result, reference);
               return;
             }
             if (result.product_link) {
-              if (message) message.textContent = 'Payment confirmed. Your product is ready.';
+              var productLinkWrap = document.getElementById('success-product-link-wrap');
+              var productLinkInput = document.getElementById('success-product-link');
+              var copyProductLinkBtn = document.getElementById('copy-success-product-link');
+              if (message) message.textContent = bonusEligible
+                ? 'Payment confirmed. Copy or open your product link below. You also qualify for a free folder.'
+                : 'Payment confirmed. Copy or open the link to use your purchase.';
+              if (productLinkWrap && productLinkInput) {
+                productLinkInput.value = result.product_link;
+                productLinkWrap.hidden = false;
+              }
+              if (copyProductLinkBtn) {
+                copyProductLinkBtn.onclick = function () { copyToClipboard(result.product_link, copyProductLinkBtn); };
+              }
               if (btn) {
                 btn.href = result.product_link;
                 btn.textContent = 'Open your product';
                 btn.hidden = false;
               }
-              setTimeout(function () { window.location.assign(result.product_link); }, 1200);
               return;
             }
             if (heading) heading.textContent = 'Payment confirmed';
-            if (message) message.textContent = 'Your payment for ' + (result.title || 'your purchase') + ' is confirmed. Ask us on Telegram and we’ll send your access.';
+            if (message) message.textContent = bonusEligible
+              ? 'Your payment is confirmed. Ask us on Telegram for access and your free bonus folder.'
+              : 'Your payment for ' + (result.title || 'your purchase') + ' is confirmed. Ask us on Telegram and we’ll send your access.';
             showTelegramRequest(result, reference);
           })();
           return;
@@ -1298,6 +1346,13 @@
       document.querySelector('#dlg-details .dlg-x').addEventListener('click', function () {
         document.getElementById('dlg-details').close();
       });
+      var folderOffer = document.getElementById('folder-offer-modal');
+      folderOffer.querySelector('.dlg-x').addEventListener('click', function () { folderOffer.close(); });
+      window.setTimeout(function () {
+        if (!folderOffer.open && !document.getElementById('success-page').classList.contains('active')) {
+          folderOffer.showModal();
+        }
+      }, 5000);
       document.getElementById('search').addEventListener('input', function () {
         renderGrid(filterList(this.value), false);
       });
